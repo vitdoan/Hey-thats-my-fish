@@ -4,6 +4,7 @@
 #include <string.h>
 
 struct Grid {
+      char* aiDirection;
       char data;
       struct Grid * up;
       struct Grid * down;
@@ -189,7 +190,7 @@ int isOutOfMove(struct Grid *ptr){
 }
 
 //This function move the player penguin as they desire
-struct Grid* move(struct Grid *curPtr,char*direction, int number, int* playerScore){
+struct Grid* move(struct Grid *curPtr,char*direction, int number, int* playerScore,char name){
     struct Grid * ptr = curPtr;
     ptr->data = '.';
     for(int i = 0; i<number; i++){
@@ -219,105 +220,192 @@ struct Grid* move(struct Grid *curPtr,char*direction, int number, int* playerSco
         }
     }
     (*playerScore) = (*playerScore)+(int)(ptr->data);
-    ptr->data = 'P';
-
+    if(name=='P'){
+      ptr->data = 'P';
+    }
+    else{
+      ptr->data = 'A';
+    }
     return ptr;
 
 }
 
-//Structure for AI to make a move
-struct Grid* AImove(struct Grid *AIptr, int* aiScore){
-    AIptr->data = '.';
-    int max = 0; //the maximum number that a path has
-    struct Grid *maxPtr;
-    struct Grid *ptr1 = AIptr;
-    struct Grid *ptr2 = AIptr;
-    struct Grid *ptr3 = AIptr;
-    struct Grid *ptr4 = AIptr;
-    struct Grid *ptr5 = AIptr;
-    struct Grid *ptr6 = AIptr;
-    struct Grid *ptr7 = AIptr;
-    struct Grid *ptr8 = AIptr;
-
-    //while the pointer to that direction is not null and not taken, check the data and compares it to the max
-    while(ptr1->up!=NULL&&(ptr1->up->data!='.')&&(ptr1->up->data!='P')){
-        if(ptr1->up->data>=max){
-            max = ptr1->up->data;
-            maxPtr = ptr1->up;
-        }
-        ptr1 = ptr1->up;
+int aiNumMove(struct Grid *aiPtr) {
+  char* maxDir;
+  int maxMove = 0;
+  struct Grid *prev = aiPtr;
+  int i = 0;
+  int numMove = 0;
+  while(prev->up != NULL){
+    i++;
+    if(prev->up->data != 'P' && prev->up->data != '.'){
+      if(prev->up->data > maxMove){
+        maxMove = prev->up->data;
+        numMove = i;
+        maxDir = "up";
+      }
+      prev = prev->up;
     }
-
-    while(ptr2->down!=NULL&&(ptr2->down->data!='.')&&(ptr2->down->data!='P')){
-        if(ptr2->down->data>=max){
-            max = ptr2->down->data;
-            maxPtr = ptr2->down;
-        }
-        ptr2 = ptr2->down;
+    else{
+      break;
     }
-
-    while(ptr3->left!=NULL&&(ptr3->left->data!='.')&&(ptr3->left->data!='P')){
-        if(ptr3->left->data>=max){
-            max = ptr3->left->data;
-            maxPtr = ptr3->left;
-        }
-        ptr3 = ptr3->left;
+    if(prev->up == NULL){
+      break;
     }
+  }
 
-    while(ptr4->right!=NULL&&(ptr4->right->data!='.')&&(ptr4->right->data!='P')){
-        if(ptr4->right->data>=max){
-            max = ptr4->right->data;
-            maxPtr = ptr4->right;
-        }
-        ptr4 = ptr4->right;
+  i = 0;
+  prev = aiPtr;
+  while(prev->down != NULL){
+    i++;
+    if(prev->down->data != 'P' && prev->down->data != '.'){
+      if(prev->down->data > maxMove){
+        maxMove = prev->down->data;
+        numMove = i;
+        maxDir = "down";
+      }
+      prev = prev->down;
     }
-
-    while(ptr5->upLeft!=NULL&&(ptr5->upLeft->data!='.')&&(ptr5->upLeft->data!='P')){
-        if(ptr5->upLeft->data>=max){
-            max = ptr5->right->data;
-            maxPtr = ptr5->upLeft;
-        }
-        ptr5 = ptr5->upLeft;
+    else{
+      break;
     }
-
-    while(ptr6->upRight!=NULL&&(ptr5->upRight->data!='.')&&(ptr5->upRight->data!='P')){
-        if(ptr6->upRight->data>=max){
-            max = ptr6->upRight->data;
-            maxPtr = ptr6->upRight;
-        }
-        ptr6 = ptr6->upRight;
+    if(prev->down == NULL){
+      break;
     }
+  }
 
-    while(ptr7->downLeft!=NULL&&(ptr7->downLeft->data!='.')&&(ptr7->downLeft->data!='P')){
-        if(ptr7->downLeft->data>=max){
-            max = ptr7->downLeft->data;
-            maxPtr = ptr7->downLeft;
-        }
-        ptr7 = ptr7->downLeft;
+  i = 0;
+  prev = aiPtr;
+  while(prev->left != NULL){
+    i++;
+    if(prev->left->data != 'P' && prev->left->data != '.'){
+      if(prev->left->data > maxMove){
+        maxMove = prev->left->data;
+        numMove = i;
+        maxDir = "left";
+      }
+      prev = prev->left;
     }
-
-    while(ptr8->downRight!=NULL&&(ptr7->downRight->data!='.')&&(ptr7->downRight->data!='P')){
-        if(ptr7->downRight->data>=max){
-            max = ptr8->downRight->data;
-            maxPtr = ptr8->downRight;
-        }
-        ptr8 = ptr8->downRight;
+    else{
+      break;
     }
-    (*aiScore) = (*aiScore)+(maxPtr->data); //update AI's score
-    AIptr = maxPtr;
-    AIptr->data = 'A';
-    return AIptr;
+    if(prev->left == NULL){
+      break;
+    }
+  }
 
+  i = 0;
+  prev = aiPtr;
+  while(prev->right != NULL){
+    i++;
+    if(prev->right->data != 'P' && prev->right->data != '.'){
+      if(prev->right->data > maxMove){
+        maxMove = prev->right->data;
+        numMove = i;
+        maxDir = "right";
+      }
+      prev = prev->right;
+    }
+    else{
+      break;
+    }
+    if(prev->right == NULL){
+      break;
+    }
+  }
+
+  i = 0;
+  prev = aiPtr;
+  while(prev->upRight != NULL){
+    i++;
+    if(prev->upRight->data != 'P' && prev->upRight->data != '.'){
+      if(prev->upRight->data > maxMove){
+        maxMove = prev->upRight->data;
+        numMove = i;
+        maxDir = "upRight";
+      }
+      prev = prev->upRight;
+    }
+    else{
+      break;
+    }
+    if(prev->upRight == NULL){
+      break;
+    }
+  }
+
+  i = 0;
+  prev = aiPtr;
+  while(prev->upLeft != NULL){
+    i++;
+    if(prev->upLeft->data != 'P' && prev->upLeft->data != '.'){
+      if(prev->upLeft->data > maxMove){
+        maxMove = prev->upLeft->data;
+        numMove = i;
+        maxDir = "upLeft";
+      }
+      prev = prev->upLeft;
+    }
+    else{
+      break;
+    }
+    if(prev->upLeft == NULL){
+      break;
+    }
+  }
+
+  i = 0;
+  prev = aiPtr;
+  while(prev->downRight != NULL){
+    i++;
+    if(prev->downRight->data != 'P' && prev->downRight->data != '.'){
+      if(prev->downRight->data > maxMove){
+        maxMove = prev->downRight->data;
+        numMove = i;
+        maxDir = "downRight";
+      }
+      prev = prev->downRight;
+    }
+    else{
+      break;
+    }
+    if(prev->downRight == NULL){
+      break;
+    }
+  }
+
+  i = 0;
+  prev = aiPtr;
+  while(prev->downLeft != NULL){
+    i++;
+    if(prev->downLeft->data != 'P' && prev->downLeft->data != '.'){
+      if(prev->downLeft->data > maxMove){
+        maxMove = prev->downLeft->data;
+        numMove = i;
+        maxDir = "downLeft";
+      }
+      prev = prev->downLeft;
+    }
+    else{
+      break;
+    }
+    if(prev->downLeft == NULL){
+      break;
+    }
+  }
+
+  aiPtr->aiDirection = maxDir;
+  return numMove;
 }
-
 
 int main(void) {
 
 struct Record playerRecord;
 struct Record aiRecord;
 struct Grid* player;
-struct Grid* ai;
 struct Grid* ptr = makeBoard();
+printf("data of position ptr-35 is %d\n", (ptr-35)->data);
+struct Grid* ai = (ptr-35);
 
 playerRecord.score = 0;
 aiRecord.score = 0;
@@ -357,7 +445,7 @@ sscanf(buffer,"%s %d",direction,&number); //get the input from player
 printf("\n");
 
 //if both player is not out of move then coninue playing
-while(isOutOfMove(player)==0 && isOutOfMove(ai)==0){
+while(isOutOfMove(player)==0 || isOutOfMove(ai)==0){
 //if the move is invalid, tell user to type again
     while(legalMove(direction,number,player)==0){
         printf("Invalid input! Please try again.\nEnter your move: ");
@@ -370,10 +458,12 @@ while(isOutOfMove(player)==0 && isOutOfMove(ai)==0){
     {
         //let player go first
         if(isOutOfMove(player)==0){
-            player = move(player,direction,number,&playerRecord.score);
+            player = move(player,direction,number,&playerRecord.score,'P');
         }
         //let AI go after
         if(isOutOfMove(ai)==0){
+          int num = aiNumMove(ai);
+          ai = move(ai,ai->aiDirection,num,&aiRecord.score,'A');
             // ai = AImove(ai,&aiRecord.score);
             //move(struct Grid *curPtr,char*direction, int number, int* playerScore)
         }
@@ -392,10 +482,32 @@ while(isOutOfMove(player)==0 && isOutOfMove(ai)==0){
 
         printf("AI's score: %i\n",aiRecord.score);
         printf("Your score: %i\n",playerRecord.score);
+        if(isOutOfMove(player)==0){
         printf("Enter your move: ");
         getline(&buffer,&size,stdin);
         sscanf(buffer,"%s %d",direction,&number);
+        }
+        if(isOutOfMove(player)==1 && isOutOfMove(ai)==0){
+          while(isOutOfMove(ai)==0){
+            for(int i = 0; i < 36; i++){
+            if((i)%6 == 0){
+                printf("\n");
+            }
+            if(ptr[i].data == 'P'||ptr[i].data == 'A'||ptr[i].data == '.'){
+                printf("%c ",ptr[i].data);
+            }
+            else
+                printf("%i ",ptr[i].data);
+            }
+            printf("\n");
 
+            printf("AI's score: %i\n",aiRecord.score);
+            printf("Your score: %i\n",playerRecord.score);
+          }
+        }
+        if(isOutOfMove(player)==1 && isOutOfMove(ai)==1){
+          break;
+        }
     }
 }
 //print out the results of the game:
