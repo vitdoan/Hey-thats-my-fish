@@ -16,10 +16,6 @@ struct Grid {
       struct Grid * downRight;
 };
 
-//This structure records the score of the game
-struct Record{
-    int score;
-};
 
 //This structure make a gameboard and connect each ptr to each other using malloc and pointers
 //Return a pointer pointing to the first address of the grid
@@ -398,125 +394,110 @@ int aiNumMove(struct Grid *aiPtr) {
   return numMove;
 }
 
+void printGameBoard(struct Grid* ptr) {
+  for(int i = 0; i < 36; i++){
+    if((i)%6 == 0){
+        printf("\n");
+    }
+    if(ptr[i].data == 'P'||(ptr+i)->data == 'A'){
+        printf("%c ",(ptr+i)->data);
+    }
+    else
+        printf("%i ",(ptr+i)->data);
+    }
+  printf("\n");
+}
+
+void printCurState(struct Grid* ptr){
+  for(int i = 0; i < 36; i++){
+    if((i)%6 == 0){
+        printf("\n");
+    }
+    if(ptr[i].data == 'P'||ptr[i].data == 'A'||ptr[i].data == '.'){
+        printf("%c ",ptr[i].data);
+    }
+    else
+        printf("%i ",ptr[i].data);
+    }
+    printf("\n");
+}
+
 int main(void) {
 
-struct Record playerRecord;
-struct Record aiRecord;
-struct Grid* player;
-struct Grid* ptr = makeBoard();
-printf("data of position ptr-35 is %d\n", (ptr-35)->data);
-struct Grid* ai = (ptr-35);
-
-playerRecord.score = 0;
-aiRecord.score = 0;
+int playerScore = 0;
+int aiScore = 0;
 int playerIndex = 35;
 int aiIndex = 0;
-player = &ptr[playerIndex]; //assign position to the player
-ai = &ptr[aiIndex]; //assign position to the ai;
+struct Grid* ptr = makeBoard();
+struct Grid* player = &ptr[playerIndex]; //assign position to the player
+struct Grid* ai = &ptr[aiIndex]; //assign position to the ai
 ptr[playerIndex].data = 'P';
 ptr[aiIndex].data = 'A';
 
 printf("\nHEY, THAT'S MY FISH!\n");
 printf("Type your move in \"DIRECTION NUMBER\" format!\n(UP, DOWN, LEFT, RIGHT, UPLEFT, UPRIGHT, DOWNLEFT, DOWNRIGHT)\nExample: \"UP 3\" will move the Penguin up 3 tiles\n");
+printGameBoard(ptr);
 
-for(int i = 0; i < 36; i++){
-  if((i)%6 == 0){
-      printf("\n");
-  }
-  if(ptr[i].data == 'P'||(ptr+i)->data == 'A'){
-      printf("%c ",(ptr+i)->data);
-  }
-  else
-      printf("%i ",(ptr+i)->data);
-  }
-printf("\n");
 
 size_t size = 32;
 char* buffer = (char*)malloc(size*sizeof(char));
-if(buffer == NULL){
-  perror("Unable to allocate buffer");
-  exit(1);
-}
 char* direction = (char*)malloc(size*sizeof(char));
 int number;
-printf("Enter your move: ");
-getline(&buffer,&size,stdin);
-sscanf(buffer,"%s %d",direction,&number); //get the input from player
-printf("\n");
 
+//!isOutOfMove(player) = isOutOfMove(player)==0
+//!isOutOfMove(ai) = isOutOfMove(ai)==0
 //if both player is not out of move then coninue playing
 while(isOutOfMove(player)==0 || isOutOfMove(ai)==0){
-//if the move is invalid, tell user to type again
-    while(legalMove(direction,number,player)==0){
-        printf("Invalid input! Please try again.\nEnter your move: ");
-        getline(&buffer,&size,stdin);
-        sscanf(buffer,"%s %d",direction,&number);
-        printf("\n");
-    }
-    //while the user type in a valid move, move P and print out the board game
-    while (legalMove(direction,number,player)==1)
-    {
-        //let player go first
-        if(isOutOfMove(player)==0){
-            player = move(player,direction,number,&playerRecord.score,'P');
-        }
-        //let AI go after
-        if(isOutOfMove(ai)==0){
+  if(isOutOfMove(player)==0){
+    printf("Enter your move: ");
+    getline(&buffer,&size,stdin);
+    sscanf(buffer,"%s %d",direction,&number);
+  }
+
+  //if the move is invalid, tell user to type again
+  while(legalMove(direction,number,player)==0){
+    printf("Invalid input! Please try again.\nEnter your move: ");
+    getline(&buffer,&size,stdin);
+    sscanf(buffer,"%s %d",direction,&number);
+    printf("\n");
+  }
+    //let player go first
+    //if player and ai are both not out of move
+    if(isOutOfMove(player)==0 && isOutOfMove(ai)==0){
+      player = move(player,direction,number,&playerScore,'P');
+      int num = aiNumMove(ai);
+      ai = move(ai,ai->aiDirection,num,&aiScore,'A');
+      printCurState(ptr);
+      printf("AI's score: %i\n",aiScore);
+      printf("Your score: %i\n",playerScore);
+      if(isOutOfMove(player)==1){
+        while (!isOutOfMove(ai)) {
           int num = aiNumMove(ai);
-          ai = move(ai,ai->aiDirection,num,&aiRecord.score,'A');
-            // ai = AImove(ai,&aiRecord.score);
-            //move(struct Grid *curPtr,char*direction, int number, int* playerScore)
+          ai = move(ai,ai->aiDirection,num,&aiScore,'A');
+          printCurState(ptr);
+          printf("AI's score: %i\n",aiScore);
+          printf("Your score: %i\n",playerScore);
         }
-        //print out the game board
-        for(int i = 0; i < 36; i++){
-        if((i)%6 == 0){
-            printf("\n");
-        }
-        if(ptr[i].data == 'P'||ptr[i].data == 'A'||ptr[i].data == '.'){
-            printf("%c ",ptr[i].data);
-        }
-        else
-            printf("%i ",ptr[i].data);
-        }
-        printf("\n");
-
-        printf("AI's score: %i\n",aiRecord.score);
-        printf("Your score: %i\n",playerRecord.score);
-        if(isOutOfMove(player)==0){
-        printf("Enter your move: ");
-        getline(&buffer,&size,stdin);
-        sscanf(buffer,"%s %d",direction,&number);
-        }
-        if(isOutOfMove(player)==1 && isOutOfMove(ai)==0){
-          while(isOutOfMove(ai)==0){
-            for(int i = 0; i < 36; i++){
-            if((i)%6 == 0){
-                printf("\n");
-            }
-            if(ptr[i].data == 'P'||ptr[i].data == 'A'||ptr[i].data == '.'){
-                printf("%c ",ptr[i].data);
-            }
-            else
-                printf("%i ",ptr[i].data);
-            }
-            printf("\n");
-
-            printf("AI's score: %i\n",aiRecord.score);
-            printf("Your score: %i\n",playerRecord.score);
-          }
-        }
-        if(isOutOfMove(player)==1 && isOutOfMove(ai)==1){
-          break;
-        }
+      }
+    }
+    //if player is out of move but ai still has moves
+    else if(isOutOfMove(player)==0 && isOutOfMove(ai)==1){
+      player = move(player,direction,number,&playerScore,'P');
+      printCurState(ptr);
+      printf("AI's score: %i\n",aiScore);
+      printf("Your score: %i\n",playerScore);
+    }
+    else{
+      break;
     }
 }
 //print out the results of the game:
-printf("Player's points: %i\n",playerRecord.score);
-printf("AI's points: %i\n",aiRecord.score);
-if(playerRecord.score>aiRecord.score){
+printf("Player's points: %i\n",playerScore);
+printf("AI's points: %i\n",aiScore);
+if(playerScore>aiScore){
     printf("Player Wins!");
 }
-else if(playerRecord.score<aiRecord.score){
+else if(playerScore<aiScore){
     printf("AI Wins!");
 }
 else printf("Draw");
