@@ -178,8 +178,14 @@ int legalMove(char* direction, int number, struct Grid* ptr){
 
 //This function checks if there is still path to go
 int isOutOfMove(struct Grid *ptr){
-    if((ptr->up==NULL)&&(ptr->down==NULL)&&(ptr->left==NULL)&&(ptr->right==NULL)&&(ptr->upLeft==NULL)
-    &&(ptr->upRight==NULL)&&(ptr->downLeft==NULL)&&(ptr->downRight==NULL)){
+    if((ptr->up==NULL || ptr->up->data == '.')&&
+    (ptr->down==NULL || ptr->down->data == '.')&&
+    (ptr->left==NULL || ptr->left->data == '.')&&
+    (ptr->right==NULL || ptr->right->data == '.')&&
+    (ptr->upLeft==NULL || ptr->upLeft->data == '.')&&
+    (ptr->upRight==NULL || ptr->upRight->data == '.')&&
+    (ptr->downLeft==NULL || ptr->downLeft->data == '.')&&
+    (ptr->downRight==NULL || ptr->downRight->data == '.')){
         return 1;
     }
     return 0;
@@ -471,7 +477,7 @@ while(isOutOfMove(player)==0 || isOutOfMove(ai)==0){
       printf("AI's score: %i\n",aiScore);
       printf("Your score: %i\n",playerScore);
       if(isOutOfMove(player)==1){
-        while (!isOutOfMove(ai)) {
+        while(isOutOfMove(ai)==0) {
           int num = aiNumMove(ai);
           ai = move(ai,ai->aiDirection,num,&aiScore,'A');
           printCurState(ptr);
